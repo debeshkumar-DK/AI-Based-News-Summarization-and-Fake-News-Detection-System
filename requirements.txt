@@ -1,0 +1,29 @@
+flask
+python-dotenv
+requests
+
+numpy
+
+torch
+transformers
+huggingface_hub
+sentence-transformers
+
+nltk
+textblob
+textstat
+vaderSentiment
+nrclex
+
+scikit-learn
+joblib
+networkx
+jinja2
+hf_xet
+# Optional (only if Dense model is used)
+# tensorflow
+# tensorflow-hub
+# tensorflow-text
+
+# Optional (only if ngrok is used)
+pyngrok

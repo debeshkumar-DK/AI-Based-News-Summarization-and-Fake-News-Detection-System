@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Fake News Detector & Summarizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass-panel { background: white; border-radius: 1rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); border: 1px solid #e2e8f0; }
+        .animate-fade-in-up { animation: fadeInUp 0.5s ease-out; }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen p-6 text-slate-800">
+
+    <div class="max-w-5xl mx-auto space-y-8">
+        
+        <div class="text-center py-6">
+            <h1 class="text-4xl font-extrabold text-slate-900 tracking-tight">🕵️ AI Fake News Detector & Summarizer</h1>
+            <p class="text-slate-500 mt-2 font-medium">Multi-Model Detection & Intelligent Summarization Architecture</p>
+        </div>
+
+        <div class="glass-panel p-8">
+            <form action="/analyze" method="POST" class="space-y-6">
+                
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">📄 Paste News Article</label>
+                    <textarea 
+                        name="news" 
+                        rows="6" 
+                        class="w-full p-4 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition text-slate-700 placeholder-slate-400 font-normal"
+                        placeholder="Paste the full text of the news article here for analysis..."
+                        required
+                    >{{ original_text if original_text else '' }}</textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">🔍 Detection Model</label>
+                        <div class="relative">
+                            <select name="detection_model" class="w-full p-3 pl-4 pr-10 border border-slate-300 rounded-lg bg-white appearance-none focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm cursor-pointer">
+                                <option value="hybrid25" {% if selected_model == 'hybrid25' %}selected{% endif %}>✨ Hybrid BERT (25 Features)</option>
+                                <option value="hybrid8" {% if selected_model == 'hybrid8' %}selected{% endif %}>Hybrid BERT (8 Features)</option>
+                                <option value="sklearn" {% if selected_model == 'sklearn' %}selected{% endif %}>Sklearn Classifier</option>
+                                <option value="dense" {% if selected_model == 'dense' %}selected{% endif %}>Dense Neural Network</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">📝 Summarizer</label>
+                        <div class="relative">
+                            <select name="summarization_model" class="w-full p-3 pl-4 pr-10 border border-slate-300 rounded-lg bg-white appearance-none focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm cursor-pointer">
+                                <option value="sbert_v2" {% if selected_summarizer == 'sbert_v2' %}selected{% endif %}>✨ SBERT V2 (Fine-Tuned MPNet)</option>
+                                <option value="sbert_base" {% if selected_summarizer == 'sbert_base' %}selected{% endif %}>⚡ SBERT Base (Fast MiniLM)</option>
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-end">
+                        <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition hover:-translate-y-0.5 flex items-center justify-center space-x-2">
+                            <span>🚀 Analyze Now</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        {% if prediction %}
+        <div class="space-y-6 animate-fade-in-up">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <div class="glass-panel p-6 flex items-center justify-between border-l-8 {{ 'border-green-500' if prediction == 'Real' else 'border-red-500' }}">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Authenticity Verdict</p>
+                        <h2 class="text-4xl font-extrabold mt-1 {{ 'text-green-600' if prediction == 'Real' else 'text-red-600' }}">
+                            {{ prediction }} News
+                        </h2>
+                    </div>
+                    <div class="text-5xl">
+                        {{ '🛡️' if prediction == 'Real' else '🚨' }}
+                    </div>
+                </div>
+
+                <div class="glass-panel p-6 flex flex-col justify-center">
+                    <div class="flex justify-between items-end mb-2">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">AI Confidence</p>
+                        <span class="text-2xl font-bold text-slate-700">{{ confidence }}</span>
+                    </div>
+                    <div class="w-full bg-slate-200 rounded-full h-4 overflow-hidden">
+                        <div id="confidence-bar"
+                             class="h-full rounded-full transition-all duration-1000 ease-out {{ 'bg-green-500' if prediction == 'Real' else 'bg-red-500' }}" 
+                             data-width="{{ confidence }}"></div>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-2 text-right">Probability of prediction accuracy</p>
+                </div>
+            </div>
+
+            <div class="glass-panel p-8 border-t-4 border-blue-500">
+                <div class="flex items-center space-x-3 mb-6">
+                    <div class="bg-blue-100 p-2 rounded-lg">
+                        <span class="text-2xl">📑</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800">Executive Summary</h3>
+                        <p class="text-sm text-slate-500">
+                            Generated using {{ 'SBERT V2 (MPNet + K-Means)' if selected_summarizer == 'sbert_v2' else 'SBERT Base (MiniLM)' }}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-50 p-6 rounded-xl border border-slate-200">
+                    <p class="text-lg leading-relaxed text-slate-700 font-serif">
+                        {{ summary }}
+                    </p>
+                </div>
+            </div>
+
+        </div>
+        {% endif %}
+
+        {% if error %}
+        <div class="glass-panel border-l-4 border-red-500 p-4 bg-red-50">
+            <div class="flex items-center space-x-3">
+                <span class="text-red-500 text-xl">⚠️</span>
+                <p class="text-red-700 font-medium">{{ error }}</p>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const bar = document.getElementById('confidence-bar');
+            if (bar) {
+                // Read the width from data attribute and apply it safely
+                bar.style.width = bar.getAttribute('data-width');
+            }
+        });
+    </script>
+
+</body>
+</html>
