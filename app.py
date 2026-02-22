@@ -23,7 +23,7 @@ load_dotenv()
 HF_TOKEN = os.getenv("HF_TOKEN")
 # Fallback if .env fails
 if not HF_TOKEN:
-    HF_TOKEN = "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"
+    HF_TOKEN = ""
 
 login(token=HF_TOKEN)
 
